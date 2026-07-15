@@ -161,6 +161,14 @@ body{font-family:'Inter',sans-serif;font-size:16px;line-height:1.6;color:#1a1a18
 .ytab.active{background:var(--green);color:#fff;border-color:var(--green)}
 .ytab:hover:not(.active){background:var(--surface-subtle)}
 
+@media(max-width:600px){
+  .year-tabs{
+    display:grid;grid-template-columns:repeat(4,1fr);
+    gap:6px;
+  }
+  .ytab{padding:8px 4px;text-align:center}
+}
+
 .stocks-grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -177,7 +185,7 @@ body{font-family:'Inter',sans-serif;font-size:16px;line-height:1.6;color:#1a1a18
 .stock-card.fail-card:hover{border-color:var(--red);box-shadow:0 4px 12px rgba(163,45,45,0.10)}
 .stock-card.fail-card .stock-gain{color:var(--red)}
 .stock-img{
-  width:100%;height:60px;
+  width:100%;height:100px;
   background:var(--surface-subtle);
   border-radius:6px;margin-bottom:8px;
   display:flex;align-items:center;justify-content:center;
@@ -214,15 +222,15 @@ body{font-family:'Inter',sans-serif;font-size:16px;line-height:1.6;color:#1a1a18
 
 .popup-header{
   display:flex;align-items:center;justify-content:space-between;
-  padding:1rem 1.25rem;border-bottom:1px solid #e2e0db;
+  padding:0.6rem 1rem;border-bottom:1px solid #e2e0db;
   flex-shrink:0;
 }
-.popup-title{display:flex;align-items:center;gap:10px}
-.popup-ticker{font-size:20px;font-weight:500;color:#1a1a18;font-family:'Lora',serif}
-.popup-gain{font-size:14px;font-weight:500;padding:3px 10px;border-radius:20px}
+.popup-title{display:flex;align-items:center;gap:8px;min-width:0}
+.popup-ticker{font-size:16px;font-weight:500;color:#1a1a18;font-family:'Lora',serif}
+.popup-gain{font-size:12px;font-weight:500;padding:2px 8px;border-radius:20px}
 .popup-gain.pos{background:#E1F5EE;color:#085041}
 .popup-gain.neg{background:#FAECE7;color:#712B13}
-.popup-year{font-size:12px;color:#9a9890;margin-left:4px}
+.popup-year{font-size:11px;color:#9a9890;margin-left:2px}
 
 .popup-close{
   width:32px;height:32px;border-radius:50%;border:none;
@@ -265,18 +273,20 @@ body{font-family:'Inter',sans-serif;font-size:16px;line-height:1.6;color:#1a1a18
   font-size:12px;color:#9a9890;text-align:center;flex-shrink:0;
 }
 
-/* Nav arrows */
-.popup-nav{display:flex;gap:8px}
-.popup-btn{
-  padding:6px 14px;border-radius:var(--radius);
-  border:1px solid #e2e0db;background:#fff;
-  font-size:13px;color:#5a5a54;cursor:pointer;
-  display:flex;align-items:center;gap:4px;
-  font-family:'Inter',sans-serif;
+/* Nav arrows — đặt ở mép trái/phải của ảnh */
+.popup-edge-nav{
+  position:absolute;top:50%;transform:translateY(-50%);
+  z-index:4;width:34px;height:34px;border-radius:50%;
+  border:1px solid #e2e0db;background:rgba(255,255,255,0.92);
+  color:#5a5a54;font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
   transition:all 0.15s;
 }
-.popup-btn:hover{background:#f2f1ee;color:#1a1a18}
-.popup-btn:disabled{opacity:0.35;cursor:not-allowed}
+.popup-edge-nav:hover{background:#fff;color:#1a1a18}
+.popup-edge-nav:disabled{opacity:0.3;cursor:not-allowed}
+.popup-edge-prev{left:8px}
+.popup-edge-next{right:8px}
 
 /* Chế độ toàn màn hình */
 .popup-box:fullscreen,
@@ -323,10 +333,6 @@ body{font-family:'Inter',sans-serif;font-size:16px;line-height:1.6;color:#1a1a18
 }
 .popup-box.fs-active .popup-ticker{color:#fff}
 .popup-box.fs-active .popup-year{color:rgba(255,255,255,0.7)}
-.popup-box.fs-active .popup-btn{
-  background:rgba(255,255,255,0.14);border-color:rgba(255,255,255,0.28);color:#fff;
-}
-.popup-box.fs-active .popup-btn:hover{background:rgba(255,255,255,0.26)}
 .popup-box.fs-active .popup-close{
   background:rgba(255,255,255,0.14);color:#fff;
 }
@@ -336,6 +342,8 @@ body{font-family:'Inter',sans-serif;font-size:16px;line-height:1.6;color:#1a1a18
   .popup-overlay{padding:0.75rem}
   .popup-box{border-radius:12px}
   .popup-body{padding:0.4rem}
+  .popup-header{padding:0.5rem 0.75rem}
+  .popup-edge-nav{width:30px;height:30px;font-size:14px}
 }
 
 .show-more-btn{
@@ -1032,14 +1040,6 @@ body{font-family:'Inter',sans-serif;font-size:16px;line-height:1.6;color:#1a1a18
         <span class="popup-year" id="popupYear">2015</span>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
-        <div class="popup-nav">
-          <button class="popup-btn" id="popupPrev" onclick="navigatePopup(-1)">
-            <i class="ti ti-chevron-left"></i> Trước
-          </button>
-          <button class="popup-btn" id="popupNext" onclick="navigatePopup(1)">
-            Sau <i class="ti ti-chevron-right"></i>
-          </button>
-        </div>
         <button class="popup-close" id="fullscreenBtn" onclick="toggleFullscreen()" aria-label="Xem toàn màn hình">
           <i class="ti ti-maximize"></i>
         </button>
@@ -1049,6 +1049,12 @@ body{font-family:'Inter',sans-serif;font-size:16px;line-height:1.6;color:#1a1a18
       </div>
     </div>
     <div class="popup-body" id="popupBody">
+      <button class="popup-edge-nav popup-edge-prev" id="popupPrev" onclick="navigatePopup(-1)" aria-label="Trước">
+        <i class="ti ti-chevron-left"></i>
+      </button>
+      <button class="popup-edge-nav popup-edge-next" id="popupNext" onclick="navigatePopup(1)" aria-label="Sau">
+        <i class="ti ti-chevron-right"></i>
+      </button>
       <div class="popup-img-wrap" id="popupImgWrap">
         <div class="popup-placeholder">
           <i class="ti ti-chart-candle"></i>
@@ -1353,11 +1359,28 @@ function renderPopup() {
   }
 
   const footer = document.getElementById('popupFooter');
-  footer.textContent = (popupIdx + 1) + ' / ' + popupList.length + ' — Bấm ESC hoặc click ngoài để đóng · Lăn chuột để zoom · Kéo chuột để di chuyển ảnh';
+  footer.textContent = (popupIdx + 1) + ' / ' + popupList.length + ' — ' + footerCaptionText();
 
   document.getElementById('popupPrev').disabled = popupIdx === 0;
   document.getElementById('popupNext').disabled = popupIdx === popupList.length - 1;
 }
+
+function isMobileViewport() {
+  return window.matchMedia('(max-width: 600px)').matches;
+}
+
+function footerCaptionText() {
+  return isMobileViewport()
+    ? 'Có thể zoom ảnh'
+    : 'Bấm ESC hoặc click ngoài để đóng · Lăn chuột để zoom · Kéo chuột để di chuyển ảnh';
+}
+
+window.addEventListener('resize', () => {
+  const overlay = document.getElementById('popupOverlay');
+  if (!overlay || !overlay.classList.contains('open')) return;
+  const footer = document.getElementById('popupFooter');
+  if (footer) footer.textContent = (popupIdx + 1) + ' / ' + popupList.length + ' — ' + footerCaptionText();
+});
 
 function navigatePopup(dir) {
   const newIdx = popupIdx + dir;

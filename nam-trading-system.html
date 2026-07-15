@@ -236,7 +236,7 @@ body{font-family:'Inter',sans-serif;font-size:16px;line-height:1.6;color:#1a1a18
 .popup-body{
   flex:1;overflow:hidden;position:relative;
   display:flex;align-items:center;justify-content:center;
-  padding:1.5rem;background:#fafaf8;
+  padding:0.5rem;background:#fafaf8;
   min-height:300px;
 }
 .popup-img-wrap{
@@ -252,26 +252,6 @@ body{font-family:'Inter',sans-serif;font-size:16px;line-height:1.6;color:#1a1a18
   user-select:none;-webkit-user-drag:none;
   transform-origin:center center;
   will-change:transform;
-}
-/* Zoom controls */
-.zoom-controls{
-  position:absolute;right:1rem;bottom:1rem;z-index:5;
-  display:flex;flex-direction:column;gap:6px;
-  background:#fff;border:1px solid #e2e0db;border-radius:10px;
-  padding:6px;box-shadow:0 4px 14px rgba(0,0,0,0.12);
-}
-.zoom-btn{
-  width:32px;height:32px;border-radius:7px;border:none;
-  background:#f2f1ee;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  font-size:16px;color:#5a5a54;
-  transition:all 0.15s;
-}
-.zoom-btn:hover{background:#e2e0db;color:#1a1a18}
-.zoom-btn:disabled{opacity:0.35;cursor:not-allowed}
-.zoom-pct{
-  font-size:11px;color:#9a9890;text-align:center;
-  padding:2px 0;user-select:none;
 }
 .popup-placeholder{
   display:flex;flex-direction:column;align-items:center;
@@ -317,13 +297,45 @@ body{font-family:'Inter',sans-serif;font-size:16px;line-height:1.6;color:#1a1a18
 .popup-box:fullscreen .popup-body,
 .popup-box:-webkit-full-screen .popup-body,
 .popup-box.fullscreen-fallback .popup-body{
-  padding:0.75rem;
+  padding:0.4rem;
 }
+
+/* Khi toàn màn hình: ẩn khung header/footer, chỉ hiện lại dạng lớp phủ mờ khi di chuột/chạm vào */
+.popup-box.fs-active .popup-header,
+.popup-box.fs-active .popup-footer{
+  position:absolute;left:0;right:0;z-index:6;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.25s ease;
+}
+.popup-box.fs-active .popup-header{
+  top:0;padding:0.75rem 1.1rem 2rem;
+  background:linear-gradient(to bottom, rgba(0,0,0,0.65), rgba(0,0,0,0));
+  border-bottom:none;
+}
+.popup-box.fs-active .popup-footer{
+  bottom:0;padding:2rem 1.1rem 0.6rem;
+  background:linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0));
+  border-top:none;color:rgba(255,255,255,0.85);
+}
+.popup-box.fs-active.show-controls .popup-header,
+.popup-box.fs-active.show-controls .popup-footer{
+  opacity:1;pointer-events:auto;
+}
+.popup-box.fs-active .popup-ticker{color:#fff}
+.popup-box.fs-active .popup-year{color:rgba(255,255,255,0.7)}
+.popup-box.fs-active .popup-btn{
+  background:rgba(255,255,255,0.14);border-color:rgba(255,255,255,0.28);color:#fff;
+}
+.popup-box.fs-active .popup-btn:hover{background:rgba(255,255,255,0.26)}
+.popup-box.fs-active .popup-close{
+  background:rgba(255,255,255,0.14);color:#fff;
+}
+.popup-box.fs-active .popup-close:hover{background:rgba(255,255,255,0.26)}
 
 @media(max-width:600px){
   .popup-overlay{padding:0.75rem}
   .popup-box{border-radius:12px}
-  .popup-body{padding:1rem}
+  .popup-body{padding:0.4rem}
 }
 
 .show-more-btn{
@@ -1043,14 +1055,8 @@ body{font-family:'Inter',sans-serif;font-size:16px;line-height:1.6;color:#1a1a18
           <p>Chưa có đồ thị cho mã này</p>
         </div>
       </div>
-      <div class="zoom-controls" id="zoomControls" style="display:none">
-        <button class="zoom-btn" onclick="zoomStep(1)" aria-label="Phóng to"><i class="ti ti-zoom-in"></i></button>
-        <div class="zoom-pct" id="zoomPct">100%</div>
-        <button class="zoom-btn" onclick="zoomStep(-1)" aria-label="Thu nhỏ"><i class="ti ti-zoom-out"></i></button>
-        <button class="zoom-btn" onclick="zoomReset()" aria-label="Đặt lại"><i class="ti ti-refresh"></i></button>
-      </div>
     </div>
-    <div class="popup-footer" id="popupFooter">Bấm ESC hoặc click ngoài để đóng · Cuộn chuột hoặc dùng nút để zoom · Kéo chuột để di chuyển ảnh</div>
+    <div class="popup-footer" id="popupFooter">Bấm ESC hoặc click ngoài để đóng · Lăn chuột để zoom · Kéo chuột để di chuyển ảnh</div>
   </div>
 </div>
 
@@ -1335,22 +1341,19 @@ function renderPopup() {
   document.getElementById('popupYear').textContent = s.year ? '· ' + s.year : '· ' + curYear;
 
   const wrap = document.getElementById('popupImgWrap');
-  const zoomControls = document.getElementById('zoomControls');
   const imgSrc = s.img || s.imgSrc || '';
   if (imgSrc) {
     wrap.innerHTML = `<img id="popupImg" src="${imgSrc}" alt="Đồ thị ${s.t}" loading="lazy">`;
-    zoomControls.style.display = 'flex';
     initZoomPan();
   } else {
     wrap.innerHTML = `<div class="popup-placeholder">
       <i class="ti ti-chart-candle"></i>
       <p>Chưa có đồ thị cho mã <strong>${s.t}</strong>.<br>Chèn ảnh vào trường img trong data STOCKS.</p>
     </div>`;
-    zoomControls.style.display = 'none';
   }
 
   const footer = document.getElementById('popupFooter');
-  footer.textContent = (popupIdx + 1) + ' / ' + popupList.length + ' — Bấm ESC hoặc click ngoài để đóng · Cuộn chuột hoặc dùng nút để zoom · Kéo chuột để di chuyển ảnh';
+  footer.textContent = (popupIdx + 1) + ' / ' + popupList.length + ' — Bấm ESC hoặc click ngoài để đóng · Lăn chuột để zoom · Kéo chuột để di chuyển ảnh';
 
   document.getElementById('popupPrev').disabled = popupIdx === 0;
   document.getElementById('popupNext').disabled = popupIdx === popupList.length - 1;
@@ -1414,10 +1417,35 @@ function toggleFullscreen() {
 
 function updateFullscreenUI() {
   const btn = document.getElementById('fullscreenBtn');
-  if (!btn) return;
+  const box = document.getElementById('popupBox');
   const active = isPopupFullscreen();
-  btn.innerHTML = active ? '<i class="ti ti-minimize"></i>' : '<i class="ti ti-maximize"></i>';
-  btn.setAttribute('aria-label', active ? 'Thoát toàn màn hình' : 'Xem toàn màn hình');
+  if (btn) {
+    btn.innerHTML = active ? '<i class="ti ti-minimize"></i>' : '<i class="ti ti-maximize"></i>';
+    btn.setAttribute('aria-label', active ? 'Thoát toàn màn hình' : 'Xem toàn màn hình');
+  }
+  box.classList.toggle('fs-active', active);
+  if (active) {
+    showFsControls();
+  } else {
+    box.classList.remove('show-controls');
+    clearTimeout(fsHideTimer);
+  }
+}
+
+/* Tự ẩn khung trên/dưới khi toàn màn hình, chỉ hiện lại khi di chuột hoặc chạm vào */
+let fsHideTimer = null;
+function showFsControls() {
+  const box = document.getElementById('popupBox');
+  if (!box.classList.contains('fs-active')) return;
+  box.classList.add('show-controls');
+  clearTimeout(fsHideTimer);
+  fsHideTimer = setTimeout(() => box.classList.remove('show-controls'), 2200);
+}
+
+const fsControlBox = document.getElementById('popupBox');
+if (fsControlBox) {
+  fsControlBox.addEventListener('mousemove', showFsControls);
+  fsControlBox.addEventListener('touchstart', showFsControls, { passive: true });
 }
 
 document.addEventListener('fullscreenchange', updateFullscreenUI);
@@ -1448,16 +1476,19 @@ let isDragging = false;
 let dragStartX = 0, dragStartY = 0;
 let panStartX = 0, panStartY = 0;
 
+/* Trạng thái cử chỉ chạm (mobile) */
+let touchPinching = false;
+let touchPanning = false;
+let touchStartDist = 0;
+let touchStartScale = 1;
+let touchStartX = 0, touchStartY = 0;
+let touchPanStartX = 0, touchPanStartY = 0;
+let lastTapTime = 0;
+
 function updateZoomUI() {
   const img = document.getElementById('popupImg');
-  const pct = document.getElementById('zoomPct');
   if (!img) return;
   img.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale})`;
-  if (pct) pct.textContent = Math.round(zoomScale * 100) + '%';
-  const zoomInBtn = document.querySelector('#zoomControls .zoom-btn:nth-child(1)');
-  const zoomOutBtn = document.querySelector('#zoomControls .zoom-btn:nth-child(3)');
-  if (zoomInBtn) zoomInBtn.disabled = zoomScale >= ZOOM_MAX;
-  if (zoomOutBtn) zoomOutBtn.disabled = zoomScale <= ZOOM_MIN;
   const wrap = document.getElementById('popupImgWrap');
   if (wrap) wrap.style.cursor = zoomScale > ZOOM_MIN ? 'grab' : 'default';
 }
@@ -1481,11 +1512,19 @@ function zoomReset() {
   updateZoomUI();
 }
 
+function touchDist(touches) {
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+  return Math.hypot(dx, dy);
+}
+
 function initZoomPan() {
   zoomScale = 1;
   panX = 0;
   panY = 0;
   isDragging = false;
+  touchPinching = false;
+  touchPanning = false;
 
   const wrap = document.getElementById('popupImgWrap');
   const img = document.getElementById('popupImg');
@@ -1526,6 +1565,65 @@ function initZoomPan() {
       zoomScale = 2;
       updateZoomUI();
     }
+  };
+
+  /* ===== CỬ CHỈ CHẠM TRÊN MOBILE ===== */
+  // Chụm/mở hai ngón tay để zoom, 1 ngón để kéo ảnh khi đã zoom, chạm đúp để zoom nhanh
+  wrap.ontouchstart = (e) => {
+    if (e.touches.length === 2) {
+      touchPinching = true;
+      touchPanning = false;
+      touchStartDist = touchDist(e.touches);
+      touchStartScale = zoomScale;
+    } else if (e.touches.length === 1) {
+      const now = Date.now();
+      if (now - lastTapTime < 300) {
+        // Chạm đúp
+        if (zoomScale > ZOOM_MIN) {
+          zoomReset();
+        } else {
+          zoomScale = 2;
+          clampPan();
+          updateZoomUI();
+        }
+        lastTapTime = 0;
+        return;
+      }
+      lastTapTime = now;
+
+      if (zoomScale > ZOOM_MIN) {
+        touchPanning = true;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchPanStartX = panX;
+        touchPanStartY = panY;
+      }
+    }
+  };
+
+  wrap.ontouchmove = (e) => {
+    if (touchPinching && e.touches.length === 2) {
+      e.preventDefault();
+      const dist = touchDist(e.touches);
+      const ratio = dist / touchStartDist;
+      zoomScale = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, touchStartScale * ratio));
+      clampPan();
+      updateZoomUI();
+    } else if (touchPanning && e.touches.length === 1) {
+      e.preventDefault();
+      panX = touchPanStartX + (e.touches[0].clientX - touchStartX);
+      panY = touchPanStartY + (e.touches[0].clientY - touchStartY);
+      updateZoomUI();
+    }
+  };
+
+  wrap.ontouchend = (e) => {
+    if (e.touches.length < 2) touchPinching = false;
+    if (e.touches.length < 1) touchPanning = false;
+  };
+  wrap.ontouchcancel = () => {
+    touchPinching = false;
+    touchPanning = false;
   };
 }
 
